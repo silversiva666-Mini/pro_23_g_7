@@ -2,6 +2,9 @@ import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:pro_23/controller/home_controller.dart';
+import 'package:pro_23/controller/language_controller.dart';
+import 'package:pro_23/core_translation/Value/app_color.dart';
+import 'package:pro_23/core_translation/Value/app_text_style.dart';
 
 import '../../model/post_model.dart';
 import '../../model/slider_model.dart';
@@ -17,7 +20,147 @@ class HomeScreen extends StatelessWidget {
     // `Get.put` returns the existing instance on rebuild, so this is safe here.
     final HomeController controller = Get.put(HomeController());
 
+    final LanguageController languageController =
+    Get.find<LanguageController>();
+
     return Scaffold(
+      drawer: Drawer(
+        child: Column(
+          children: [
+            Container(
+              width: double.infinity,
+              color: AppColor.primary,
+              padding: const EdgeInsets.only(top: 50, left: 30, bottom: 30),
+
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+
+                children: [
+                  CircleAvatar(
+                    radius: 52,
+                    backgroundColor: AppColor.surface,
+                    child: Text(
+                      'AD',
+                      style: AppTextStyle.title.copyWith(
+                        color: AppColor.primaryDark,
+                        fontSize: 32,
+                      ),
+                    ),
+                  ),
+
+                  const SizedBox(height: 25),
+                  Text(
+                    'getx_basic'.tr,
+                    style: AppTextStyle.title.copyWith(
+                      color: AppColor.surface,
+                      fontSize: 22,
+                    ),
+                  ),
+
+                  const SizedBox(height: 8),
+
+                  Text(
+                    'admin@example.com',
+                    style: AppTextStyle.body.copyWith(
+                      color: AppColor.surface,
+                      fontSize: 18,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+
+            ListTile(
+              leading: const Icon(Icons.people_outline),
+
+              title: Text('Users'.tr),
+
+              onTap: () {},
+            ),
+
+            // ===================================================
+            // NEW USER
+            // ===================================================
+            ListTile(
+              leading: const Icon(Icons.person_add_alt_1),
+
+              title: Text('New user'.tr),
+
+              onTap: () {},
+            ),
+
+            const Divider(),
+
+            // ===================================================
+            // LANGUAGE
+            // ===================================================
+            ListTile(
+              leading: const Icon(Icons.translate),
+
+              title: Text('language'.tr),
+
+              trailing: Text(
+                languageController.currentLanguage == 'km'
+                    ? 'khmer'.tr
+                    : 'english'.tr,
+
+                style: AppTextStyle.caption.copyWith(
+                  color: AppColor.primary,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+
+              // Click Language
+              onTap: () {
+                _showLanguageDialog(languageController);
+              },
+            ),
+
+            // ===================================================
+            // CONNECTION
+            // ===================================================
+            ListTile(
+              leading: const Icon(Icons.signal_cellular_alt),
+
+              title: Text('Connection'.tr),
+
+              trailing: Text(
+                'Online'.tr,
+
+                style: AppTextStyle.caption.copyWith(
+                  color: AppColor.primary,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+
+            const Spacer(),
+            const Divider(),
+
+            ListTile(
+              leading: Icon(Icons.logout, color: AppColor.danger),
+
+              title: Text(
+                'Logout'.tr,
+                style: AppTextStyle.error,
+              ),
+
+              onTap: () {
+                Navigator.pop(context);
+              },
+            ),
+          ],
+        ),
+      ),
+
+      // =========================================================
+      // APP BAR
+      // =========================================================
+      appBar: AppBar(
+        title: Text('Home'.tr),
+
+        backgroundColor: AppColor.primaryLight,
+      ),
       // =========================
       // Body
       // =========================
@@ -44,7 +187,7 @@ class HomeScreen extends StatelessWidget {
                     margin: const EdgeInsets.symmetric(horizontal: 4),
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(16),
-                      color: Colors.greenAccent,
+                      color: AppColor.primaryLight,
                     ),
                     clipBehavior: Clip.antiAlias,
                     child: Stack(
@@ -67,14 +210,14 @@ class HomeScreen extends StatelessWidget {
                         // =========================
                         // Dark Overlay
                         // =========================
-                        const DecoratedBox(
+                        DecoratedBox(
                           decoration: BoxDecoration(
                             gradient: LinearGradient(
                               begin: Alignment.center,
                               end: Alignment.bottomCenter,
                               colors: <Color>[
                                 Colors.transparent,
-                                Colors.black54,
+                                AppColor.textPrimary.withOpacity(0.6),
                               ],
                             ),
                           ),
@@ -92,8 +235,8 @@ class HomeScreen extends StatelessWidget {
                             children: <Widget>[
                               Text(
                                 banner.title,
-                                style: const TextStyle(
-                                  color: Colors.white,
+                                style: AppTextStyle.heading.copyWith(
+                                  color: AppColor.surface,
                                   fontSize: 17,
                                   fontWeight: FontWeight.bold,
                                 ),
@@ -105,8 +248,8 @@ class HomeScreen extends StatelessWidget {
                                   banner.subtitle!.isNotEmpty)
                                 Text(
                                   banner.subtitle!,
-                                  style: const TextStyle(
-                                    color: Colors.white70,
+                                  style: AppTextStyle.caption.copyWith(
+                                    color: AppColor.surface.withOpacity(0.7),
                                     fontSize: 12,
                                   ),
                                   maxLines: 1,
@@ -138,10 +281,7 @@ class HomeScreen extends StatelessWidget {
                 padding: const EdgeInsets.symmetric(horizontal: 16),
                 child: Text(
                   'Latest Posts'.tr,
-                  style: const TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                  ),
+                  style: AppTextStyle.heading.copyWith(fontSize: 20),
                 ),
               ),
 
@@ -171,9 +311,9 @@ class HomeScreen extends StatelessWidget {
                               url,
                               fit: BoxFit.cover,
                               errorBuilder: (_, _, _) {
-                                return const ColoredBox(
-                                  color: Colors.greenAccent,
-                                  child: Icon(Icons.article_outlined),
+                                return ColoredBox(
+                                  color: AppColor.primaryLight,
+                                  child: const Icon(Icons.article_outlined),
                                 );
                               },
                             ),
@@ -191,9 +331,8 @@ class HomeScreen extends StatelessWidget {
                             children: <Widget>[
                               Text(
                                 post.title,
-                                style: const TextStyle(
+                                style: AppTextStyle.heading.copyWith(
                                   fontSize: 16,
-                                  fontWeight: FontWeight.w600,
                                 ),
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
@@ -203,10 +342,7 @@ class HomeScreen extends StatelessWidget {
 
                               Text(
                                 post.author?.displayName ?? 'Unknown',
-                                style: const TextStyle(
-                                  fontSize: 13,
-                                  color: Colors.grey,
-                                ),
+                                style: AppTextStyle.caption,
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
                               ),
@@ -221,6 +357,43 @@ class HomeScreen extends StatelessWidget {
             ],
           );
         }),
+      ),
+    );
+  }
+
+  void _showLanguageDialog(LanguageController controller) {
+    Get.dialog(
+      AlertDialog(
+        title: Text('language'.tr),
+
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+
+          children: [
+            // ENGLISH
+            ListTile(
+              leading: const Text('🇺🇸', style: TextStyle(fontSize: 24)),
+              title: Text('english'.tr),
+              onTap: () {
+                controller.changeLanguage('en');
+                Get.back();
+              },
+            ),
+
+            // KHMER
+            ListTile(
+              leading: const Text('🇰🇭', style: TextStyle(fontSize: 24)),
+
+              title: Text('khmer'.tr),
+
+              onTap: () {
+                controller.changeLanguage('km');
+
+                Get.back();
+              },
+            ),
+          ],
+        ),
       ),
     );
   }

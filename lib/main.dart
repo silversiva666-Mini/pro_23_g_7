@@ -1,23 +1,202 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+
+import 'package:pro_23/binding/auth_binding.dart';
+import 'package:pro_23/controller/language_controller.dart';
+import 'package:pro_23/controller/network_controller.dart';
+import 'package:pro_23/core_translation/core_translation.dart';
+import 'package:pro_23/screen/Auth/login_screen.dart';
 import 'package:pro_23/screen/main_screen.dart';
+import 'package:pro_23/screen/post/post_create.dart';
+import 'package:pro_23/screen/post/post_list_screen.dart';
 
 void main() {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  Get.put(LanguageController());
+
+  Get.put<NetworkController>(
+    NetworkController(),
+    permanent: true,
+  );
+
   runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return GetMaterialApp(
       title: 'Flutter Demo',
-      theme: ThemeData(
 
-        colorScheme: .fromSeed(seedColor: Colors.deepPurple),
+      debugShowCheckedModeBanner: false,
+
+      theme: ThemeData(
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: Colors.deepPurple,
+        ),
       ),
-      home: MainScreen(),
+
+      translations: CoreTranslation(),
+      locale: const Locale('en', 'US'),
+      fallbackLocale: const Locale('en', 'KH'),
+
+      initialRoute: '/login',
+
+      getPages: [
+        GetPage(
+          name: '/',
+          page: () => const MainScreen(),
+        ),
+
+        GetPage(
+          name: '/login',
+          page: () => const LoginScreen(),
+          binding: AuthBinding(),
+        ),
+
+        GetPage(
+          name: '/post_list',
+          page: () => const PostListScreen(),
+        ),
+
+        GetPage(
+          name: '/post_create',
+          page: () => const PostCreateScreen(),
+        ),
+      ],
+
+      // ✅ Check internet for the WHOLE APP
+      builder: (context, child) {
+        return InternetWrapper(
+          child: child ?? const SizedBox.shrink(),
+        );
+      },
+    );
+  }
+}
+
+
+// =====================================================
+// INTERNET WRAPPER
+// =====================================================
+class InternetWrapper extends StatelessWidget {
+  final Widget child;
+
+  const InternetWrapper({
+    super.key,
+    required this.child,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final NetworkController networkController =
+    Get.find<NetworkController>();
+
+    return Obx(() {
+      return Stack(
+        children: [
+          // Your normal app
+          child,
+
+          // Show red banner when internet is OFF
+          if (!networkController.isConnected.value)
+            Positioned(
+              top: 0,
+              left: 0,
+              right: 0,
+              child: SafeArea(
+                bottom: false,
+                child: Material(
+                  color: Colors.red,
+                  child: Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 14,
+                    ),
+                    child: const Row(
+                      children: [
+                        Icon(
+                          Icons.wifi_off_rounded,
+                          color: Colors.white,
+                          size: 28,
+                        ),
+
+                        SizedBox(width: 12),
+
+                        Expanded(
+                          child: Text(
+                            'No internet connection',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 16,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ),
+        ],
+      );
+    });
+  }
+}
+
+// =====================================================
+// NO INTERNET SCREEN
+// =====================================================
+
+class NoInternetScreen extends StatelessWidget {
+  const NoInternetScreen({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return const Scaffold(
+      body: SafeArea(
+        child: Center(
+          child: Padding(
+            padding: EdgeInsets.all(24),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(
+                  Icons.wifi_off_rounded,
+                  size: 90,
+                  color: Colors.grey,
+                ),
+
+                SizedBox(height: 20),
+
+                Text(
+                  'No internet connection',
+                  style: TextStyle(
+                    fontSize: 22,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+
+                SizedBox(height: 10),
+
+                Text(
+                  'Please connect to Wi-Fi or mobile data.',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 16,
+                    color: Colors.grey,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
     );
   }
 }
