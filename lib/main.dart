@@ -9,22 +9,27 @@ import 'package:pro_23/screen/Auth/login_screen.dart';
 import 'package:pro_23/screen/main_screen.dart';
 import 'package:pro_23/screen/post/post_create.dart';
 import 'package:pro_23/screen/post/post_list_screen.dart';
+import 'package:pro_23/service/storage_service.dart';
 
-void main() {
+Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  final StorageService storage = Get.put(StorageService(), permanent: true);
+  final String? token = await storage.getToken();
+
+  // ✅ NEW: Check whether a token was saved.
+  final bool hasToken = token != null && token.isNotEmpty;
 
   Get.put(LanguageController());
 
-  Get.put<NetworkController>(
-    NetworkController(),
-    permanent: true,
-  );
+  Get.put<NetworkController>(NetworkController(), permanent: true);
 
-  runApp(const MyApp());
+  runApp(MyApp(hasToken: hasToken));
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+  final bool hasToken;
+
+  const MyApp({super.key, required this.hasToken});
 
   @override
   Widget build(BuildContext context) {
@@ -34,22 +39,17 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
 
       theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(
-          seedColor: Colors.deepPurple,
-        ),
+        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
       ),
 
       translations: CoreTranslation(),
       locale: const Locale('en', 'US'),
       fallbackLocale: const Locale('en', 'KH'),
 
-      initialRoute: '/login',
+      initialRoute: hasToken ? '/' : '/login',
 
       getPages: [
-        GetPage(
-          name: '/',
-          page: () => const MainScreen(),
-        ),
+        GetPage(name: '/', page: () => const MainScreen()),
 
         GetPage(
           name: '/login',
@@ -57,27 +57,18 @@ class MyApp extends StatelessWidget {
           binding: AuthBinding(),
         ),
 
-        GetPage(
-          name: '/post_list',
-          page: () => const PostListScreen(),
-        ),
+        GetPage(name: '/post_list', page: () => const PostListScreen()),
 
-        GetPage(
-          name: '/post_create',
-          page: () => const PostCreateScreen(),
-        ),
+        GetPage(name: '/post_create', page: () => const PostCreateScreen()),
       ],
 
       // ✅ Check internet for the WHOLE APP
       builder: (context, child) {
-        return InternetWrapper(
-          child: child ?? const SizedBox.shrink(),
-        );
+        return InternetWrapper(child: child ?? const SizedBox.shrink());
       },
     );
   }
 }
-
 
 // =====================================================
 // INTERNET WRAPPER
@@ -85,15 +76,11 @@ class MyApp extends StatelessWidget {
 class InternetWrapper extends StatelessWidget {
   final Widget child;
 
-  const InternetWrapper({
-    super.key,
-    required this.child,
-  });
+  const InternetWrapper({super.key, required this.child});
 
   @override
   Widget build(BuildContext context) {
-    final NetworkController networkController =
-    Get.find<NetworkController>();
+    final NetworkController networkController = Get.find<NetworkController>();
 
     return Obx(() {
       return Stack(
@@ -166,20 +153,13 @@ class NoInternetScreen extends StatelessWidget {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(
-                  Icons.wifi_off_rounded,
-                  size: 90,
-                  color: Colors.grey,
-                ),
+                Icon(Icons.wifi_off_rounded, size: 90, color: Colors.grey),
 
                 SizedBox(height: 20),
 
                 Text(
                   'No internet connection',
-                  style: TextStyle(
-                    fontSize: 22,
-                    fontWeight: FontWeight.bold,
-                  ),
+                  style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
                 ),
 
                 SizedBox(height: 10),
@@ -187,10 +167,7 @@ class NoInternetScreen extends StatelessWidget {
                 Text(
                   'Please connect to Wi-Fi or mobile data.',
                   textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontSize: 16,
-                    color: Colors.grey,
-                  ),
+                  style: TextStyle(fontSize: 16, color: Colors.grey),
                 ),
               ],
             ),
